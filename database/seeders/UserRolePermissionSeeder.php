@@ -46,6 +46,7 @@ class UserRolePermissionSeeder extends Seeder
         // Create Roles
         $superAdminRole = Role::create(['name' => 'super-admin']); //as super-admin
         $adminRole = Role::create(['name' => 'admin']);
+        $driverRole = Role::create(['name' => 'driver']);
         $userRole = Role::create(['name' => 'user']);
 
         // give all permissions to super-admin role.
@@ -66,6 +67,7 @@ class UserRolePermissionSeeder extends Seeder
                 ], [
                     'name' => 'Super Admin',
                     'email' => 'superadmin@gmail.com',
+                    'phone' => '123456789',
                     'username' => 'superadmin',
                     'password' => Hash::make ('superadmin@gmail.com'),
                     'email_verified_at' => now(),
@@ -85,6 +87,7 @@ class UserRolePermissionSeeder extends Seeder
                         ], [
                             'name' => 'Admin',
                             'username' => 'admin',
+                            'phone' => '0000000000',
                             'email' => 'admin@gmail.com',
                             'password' => Hash::make ('admin@gmail.com'),
                             'email_verified_at' => now(),

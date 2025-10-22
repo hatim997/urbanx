@@ -23,7 +23,6 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
             $table->string('first_name')->nullable();
-            $table->string('middle_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('profile_image')->nullable();
             $table->timestamp('dob')->nullable();
