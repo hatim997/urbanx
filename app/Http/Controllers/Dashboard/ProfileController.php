@@ -85,7 +85,8 @@ class ProfileController extends Controller
             'last_name' => 'nullable|string|max:255',
             'dob' => 'nullable|date',
             'bio' => 'nullable|string|max:255',
-            'gender_id' => 'nullable|exists:genders,id',
+            // 'gender_id' => 'nullable|exists:genders,id',
+            'gender' => 'nullable|string|max:255',
             'language_id' => 'nullable|exists:languages,id',
             'designation_id' => 'nullable|exists:designations,id',
             'marital_status_id' => 'nullable|exists:marital_statuses,id',
@@ -117,9 +118,9 @@ class ProfileController extends Controller
 
             $profile->first_name = $request->first_name;
             $profile->last_name = $request->last_name;
-            $profile->dob = $profile->dob ? date('Y-m-d', strtotime($profile->dob)) : null;
+            $profile->dob = $request->dob ? date('Y-m-d', strtotime($request->dob)) : null;
             $profile->bio = $request->bio;
-            $profile->gender_id = $request->gender_id;
+            $profile->gender = $request->gender;
             $profile->language_id = $request->language_id;
             $profile->designation_id = $request->designation_id;
             $profile->marital_status_id = $request->marital_status_id;

@@ -31,8 +31,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Driver Routes
     Route::group(['prefix' => 'driver'], function () {
+        //Driver Vehicle
         Route::get('/vehicle', [DriverDetailsController::class, 'getVehicleDetails']);
         Route::post('/vehicle/update', [DriverDetailsController::class, 'updateVehicleDetails']);
+
+        //Driver License
+        Route::get('/license', [DriverDetailsController::class, 'getLicenseDetails']);
+        Route::post('/license/update', [DriverDetailsController::class, 'updateLicenseDetails']);
+
+        //Driver Personal Information
+        Route::get('/personal-information', [DriverDetailsController::class, 'getPersonalInformation']);
+        Route::post('/personal-information/update', [DriverDetailsController::class, 'updatePersonalInformation']);
     });
 
 });

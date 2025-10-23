@@ -144,8 +144,8 @@
                         <option value="" selected disabled>{{ __('Select Gender') }}</option>
                         @if (isset($genders) && count($genders) > 0)
                             @foreach ($genders as $gender)
-                                <option value="{{ $gender->id }}"
-                                    {{ $gender->id == $profile->gender_id ? 'selected' : '' }}>{{ $gender->name }}
+                                <option value="{{ $gender->name }}"
+                                    {{ $gender->name == $profile->gender ? 'selected' : '' }}>{{ $gender->name }}
                                 </option>
                             @endforeach
                         @endif

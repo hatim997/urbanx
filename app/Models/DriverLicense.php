@@ -5,19 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DriverVehicle extends Model
+class DriverLicense extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'driver_id',
-        'vehicle_name',
-        'vehicle_make',
-        'vehicle_model',
-        'vehicle_color',
-        'vehicle_year',
-        'vehicle_plate_number',
-        'vehicle_images',
+        'name',
+        'license_number',
+        'address',
+        'front_picture',
+        'back_picture',
     ];
 
     public function driver()
