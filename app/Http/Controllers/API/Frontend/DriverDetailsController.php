@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\DriverCnic;
 use App\Models\DriverLicense;
 use App\Models\DriverVehicle;
 use App\Models\Profile;
@@ -313,11 +314,103 @@ class DriverDetailsController extends Controller
                     'last_name' => $profile->last_name,
                     'dob' => $profile->dob,
                     'gender' => $profile->gender,
-                    'profile_picture' => url($profile->profile_picture),
+                    'profile_image' => url($profile->profile_image),
                 ]
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
             Log::error('API Update Personal Information failed', ['error' => $th->getMessage()]);
+            return response()->json([
+                'message' => 'Something went wrong!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function getCNICDetails(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            $driverCNIC = DriverCnic::where('driver_id', $user->id)->first();
+
+            $data = null;
+
+            if ($driverCNIC) {
+                // Prepare response data
+                $data = [
+                    'name' => $driverCNIC->name,
+                    'cnic_number' => $driverCNIC->cnic_number,
+                    'issue_date' => $driverCNIC->issue_date,
+                    'front_picture' => url($driverCNIC->front_picture),
+                    'back_picture' => url($driverCNIC->back_picture),
+                ];
+            }
+
+            return response()->json([
+                'cnic' => $data,
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            Log::error('API CNIC Details failed', ['error' => $th->getMessage()]);
+            return response()->json([
+                'message' => 'Something went wrong!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function updateCNICDetails(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string',
+            'cnic_number' => 'required|string',
+            'issue_date' => 'required|string',
+            'front_picture' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max_size',
+            'back_picture' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max_size',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $user = $request->user();
+
+            $driverCNIC = DriverCnic::where('driver_id', $user->id)->first();
+
+            if (!$driverCNIC) {
+                $driverCNIC = new DriverCnic();
+                $driverCNIC->driver_id = $user->id;
+            }
+
+            $driverCNIC->name = $request->input('name');
+            $driverCNIC->cnic_number = $request->input('cnic_number');
+            $driverCNIC->issue_date = $request->input('issue_date') ? date('Y-m-d', strtotime($request->input('issue_date'))) : null;
+
+            if ($request->hasFile('front_picture')) {
+                $path = $request->file('front_picture')->store('uploads/cnic-images', 'public');
+                $driverCNIC->front_picture = $path;
+            }
+
+            if ($request->hasFile('back_picture')) {
+                $path = $request->file('back_picture')->store('uploads/cnic-images', 'public');
+                $driverCNIC->back_picture = $path;
+            }
+
+            $driverCNIC->save();
+
+            return response()->json([
+                'message' => 'CNIC details updated successfully',
+                'cnic' => [
+                    'name' => $driverCNIC->name,
+                    'cnic_number' => $driverCNIC->cnic_number,
+                    'issue_date' => $driverCNIC->issue_date,
+                    'front_picture' => url($driverCNIC->front_picture),
+                    'back_picture' => url($driverCNIC->back_picture),
+                ]
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            Log::error('API Update CNIC Details failed', ['error' => $th->getMessage()]);
             return response()->json([
                 'message' => 'Something went wrong!'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);

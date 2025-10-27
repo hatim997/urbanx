@@ -8,6 +8,11 @@
     @include('layouts.meta')
     @include('layouts.css')
     @yield('css')
+    <style>
+        .menu-vertical .menu-item .menu-toggle::after {
+            color: #fff;
+        }
+    </style>
 </head>
 
 <body>

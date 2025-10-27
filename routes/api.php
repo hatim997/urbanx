@@ -42,6 +42,10 @@ Route::middleware('auth:sanctum')->group(function () {
         //Driver Personal Information
         Route::get('/personal-information', [DriverDetailsController::class, 'getPersonalInformation']);
         Route::post('/personal-information/update', [DriverDetailsController::class, 'updatePersonalInformation']);
+
+        //Driver CNIC
+        Route::get('/cnic', [DriverDetailsController::class, 'getCNICDetails']);
+        Route::post('/cnic/update', [DriverDetailsController::class, 'updateCNICDetails']);
     });
 
 });
