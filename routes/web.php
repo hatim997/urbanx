@@ -13,6 +13,7 @@ use App\Http\Controllers\Dashboard\RolePermission\RoleController;
 use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\User\ArchivedUserController;
 use App\Http\Controllers\Dashboard\User\UserController;
+use App\Http\Controllers\Dashboard\DriverController;
 use App\Http\Middleware\CheckAccountActivation;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -55,6 +56,9 @@ Route::get('/current-time', function () {
 Auth::routes();
 Route::get('/', function () {
     return redirect()->route('dashboard');
+});
+Route::get('/test-route', function () {
+    return view('dashboard.test.test_ride_location');
 });
 // Guest Routes
 Route::group(['middleware' => ['guest']], function () {
@@ -105,16 +109,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('profile/setting/account/{id}', [ProfileController::class, 'accountDeactivation'])->name('account.deactivate');
         Route::post('profile/security/password/{id}', [ProfileController::class, 'passwordUpdate'])->name('update.password');
 
-        Route::get('/notifications', [NotificationController::class, 'index']);
-        Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
-        Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
-        Route::post('/notifications/{id}/delete', [NotificationController::class, 'deleteNotification']);
+        Route::get('/get/notifications', [NotificationController::class, 'getNotifications']);
+        Route::get('/notifications/click/{id}', [NotificationController::class, 'notificationClickHandle'])->name('notification.click');
+        Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+        Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+        Route::post('/notifications/delete-all', [NotificationController::class, 'deleteAll'])->name('notifications.deleteAll');
+        Route::post('/notifications/{id}/delete', [NotificationController::class, 'deleteNotification'])->name('notifications.delete');
         Route::get('/notifications/send-test-noti/{id}', [NotificationController::class, 'testNotification']);
 
         Route::get('dashboard', [HomeController::class, 'index'])->name('dashboard');
 
         // Admin Dashboard Authentication Routes
         Route::prefix('dashboard')->name('dashboard.')->group(function () {
+            Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
 
             Route::resource('user', UserController::class);
             Route::resource('archived-user', ArchivedUserController::class);
@@ -136,9 +143,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('send-mail/setting', [SettingController::class, 'sendTestMail'])->name('setting.send_test_mail');
 
             // User Dashboard Authentication Routes
+            Route::resource('drivers', DriverController::class);
 
-
-
+            //Create Notification
+            Route::get('/notifications/create', [NotificationController::class, 'create'])->name('notifications.create');
+            Route::post('/notifications/store', [NotificationController::class, 'store'])->name('notifications.store');
         });
     });
 

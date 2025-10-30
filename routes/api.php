@@ -4,6 +4,7 @@ use App\Http\Controllers\API\Auth\LoginController;
 use App\Http\Controllers\API\Auth\RegisterController;
 use App\Http\Controllers\API\Frontend\DriverDetailsController;
 use App\Http\Controllers\API\Frontend\NotificationController;
+use App\Http\Controllers\Dashboard\HomeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -55,3 +56,6 @@ Route::post('/login', [LoginController::class, 'login_attempt']);
 Route::post('/register', [RegisterController::class, 'register_attempt']);
 // Route::post('/forget-password', [ForgetPasswordController::class, 'forgetPassEmail']);
 // Route::post('/reset-password', [ForgetPasswordController::class, 'resetPassword']);
+
+//test routes
+Route::get('/ride/route', [HomeController::class, 'getRoute']);

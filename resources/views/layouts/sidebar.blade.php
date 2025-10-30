@@ -28,6 +28,22 @@
         <li class="menu-header small">
             <span class="menu-header-text">{{__('Apps & Pages')}}</span>
         </li>
+        @can(['view driver'])
+            <li class="menu-item {{ request()->routeIs('dashboard.drivers.*') ? 'active' : '' }}">
+                <a href="{{ route('dashboard.drivers.index') }}" class="menu-link" style="color: #fff !important;">
+                    <i class="menu-icon tf-icons ti ti-steering-wheel"></i>
+                    <div>{{__('Drivers')}}</div>
+                </a>
+            </li>
+        @endcan
+        @can(['create notification'])
+            <li class="menu-item {{ request()->routeIs('dashboard.notifications.create') ? 'active' : '' }}">
+                <a href="{{ route('dashboard.notifications.create') }}" class="menu-link" style="color: #fff !important;">
+                    <i class="menu-icon tf-icons ti ti-bell"></i>
+                    <div>{{__('Send Notification')}}</div>
+                </a>
+            </li>
+        @endcan
         @canany(['view user', 'view archived user'])
             <li class="menu-item {{ request()->routeIs('dashboard.user.*') || request()->routeIs('dashboard.archived-user.*') ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle" style="color: #fff !important;">

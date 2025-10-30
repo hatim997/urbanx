@@ -42,6 +42,15 @@ class UserRolePermissionSeeder extends Seeder
         Permission::create(['name' => 'update setting']);
         Permission::create(['name' => 'delete setting']);
 
+        Permission::create(['name' => 'view driver']);
+        Permission::create(['name' => 'create driver']);
+        Permission::create(['name' => 'update driver']);
+        Permission::create(['name' => 'delete driver']);
+
+        Permission::create(['name' => 'view notification']);
+        Permission::create(['name' => 'create notification']);
+        Permission::create(['name' => 'update notification']);
+        Permission::create(['name' => 'delete notification']);
 
         // Create Roles
         $superAdminRole = Role::create(['name' => 'super-admin']); //as super-admin

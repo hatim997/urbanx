@@ -7,6 +7,7 @@ use App\Models\DriverCnic;
 use App\Models\DriverLicense;
 use App\Models\DriverVehicle;
 use App\Models\Profile;
+use App\Models\VehicleType;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -21,7 +22,12 @@ class DriverDetailsController extends Controller
         try {
             $user = $request->user();
 
-            $driverVehicle = DriverVehicle::where('driver_id', $user->id)->first();
+            $driverVehicle = DriverVehicle::with('vehicleType')->where('driver_id', $user->id)->first();
+
+            // Get only id and name of active vehicle types
+            $vehicleTypes = VehicleType::where('is_active', 'active')
+                ->select('id', 'name')
+                ->get();
 
             $data = null;
 
@@ -38,6 +44,8 @@ class DriverDetailsController extends Controller
 
                 // Prepare response data
                 $data = [
+                    'vehicle_type' => $driverVehicle->vehicleType->name,
+                    'vehicle_type_id' => $driverVehicle->vehicle_type_id,
                     'vehicle_name' => $driverVehicle->vehicle_name,
                     'vehicle_make' => $driverVehicle->vehicle_make,
                     'vehicle_model' => $driverVehicle->vehicle_model,
@@ -51,6 +59,7 @@ class DriverDetailsController extends Controller
 
             return response()->json([
                 'vehicle' => $data,
+                'vehicle_types' => $vehicleTypes,
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
             Log::error('API Vehicle Details failed', ['error' => $th->getMessage()]);
@@ -63,6 +72,7 @@ class DriverDetailsController extends Controller
     public function updateVehicleDetails(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'vehicle_type_id' => 'required|exists:vehicle_types,id',
             'vehicle_name' => 'required|string',
             'vehicle_make' => 'nullable|string',
             'vehicle_model' => 'nullable|string',
@@ -90,6 +100,7 @@ class DriverDetailsController extends Controller
                 $driverVehicle->driver_id = $user->id;
             }
 
+            $driverVehicle->vehicle_type_id = $request->input('vehicle_type_id');
             $driverVehicle->vehicle_name = $request->input('vehicle_name');
             $driverVehicle->vehicle_make = $request->input('vehicle_make');
             $driverVehicle->vehicle_model = $request->input('vehicle_model');
@@ -117,6 +128,8 @@ class DriverDetailsController extends Controller
             return response()->json([
                 'message' => 'Vehicle details updated successfully',
                 'vehicle' => [
+                    'vehicle_type' => $driverVehicle->vehicleType->name,
+                    'vehicle_type_id' => $driverVehicle->vehicle_type_id,
                     'vehicle_name' => $driverVehicle->vehicle_name,
                     'vehicle_make' => $driverVehicle->vehicle_make,
                     'vehicle_model' => $driverVehicle->vehicle_model,
