@@ -64,6 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
         //Customer Personal Information
         route::post('/request-ride', [RideController::class, 'requestRide']);
         route::post('/calculate-distance-fare', [RideController::class, 'calculateDistanceFare']);
+        route::post('/get-vehicle-types', [RideController::class, 'getVehicleTypes']);
         route::post('/apply-promo-code', [RideController::class, 'promoCodeApply']);
         route::post('/get-ride-offers', [RideController::class, 'rideOffers']);
         route::post('/accept-ride-offer', [RideController::class, 'acceptRideOffer']);

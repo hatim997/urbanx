@@ -124,6 +124,35 @@ class RideController extends Controller
         }
     }
 
+    public function getVehicleTypes(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'distance_km' => 'required|numeric|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+        try {
+            $vehicleTypes = VehicleType::where('is_active', 'active')->get();
+            foreach ($vehicleTypes as $vehicleType) {
+                $fare = $request->distance_km * $vehicleType->base_fare;
+                $vehicleType->fare = $fare;
+            }
+            return response()->json([
+                'vehicle_types' => $vehicleTypes,
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            Log::error('API Get Vehicle Types failed', ['error' => $th->getMessage()]);
+            return response()->json([
+                'message' => 'Something went wrong!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public function requestRide(Request $request)
     {
         $validator = Validator::make($request->all(), [
