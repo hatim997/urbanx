@@ -138,10 +138,15 @@ class RideController extends Controller
         }
         try {
             $vehicleTypes = VehicleType::where('is_active', 'active')->get();
-            foreach ($vehicleTypes as $vehicleType) {
-                $fare = $request->distance_km * $vehicleType->base_fare;
-                $vehicleType->fare = $fare;
-            }
+
+            $data = $vehicleTypes->map(function ($v) use ($request) {
+                return [
+                    'id'   => $v->id,
+                    'name' => $v->name,
+                    'icon' => ( $v->icon ) ? url($v->icon) : null,
+                    'fare' => $request->distance_km * $v->base_fare,
+                ];
+            });
             return response()->json([
                 'vehicle_types' => $vehicleTypes,
             ], Response::HTTP_OK);
