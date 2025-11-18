@@ -20,4 +20,14 @@ class RideOffer extends Model
         'accepted_at',
         'expires_at',
     ];
+
+    public function ride()
+    {
+        return $this->belongsTo(Ride::class, 'ride_id');
+    }
+    
+    public function driver()
+    {
+        return $this->belongsTo(User::class, 'driver_id');
+    }
 }

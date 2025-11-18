@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\Frontend\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\PromoCode;
 use App\Models\Ride;
+use App\Models\RideOffer;
 use App\Models\VehicleType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -171,6 +172,255 @@ class RideController extends Controller
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
             Log::error('API Store Ride failed', ['error' => $th->getMessage()]);
+            return response()->json([
+                'message' => 'Something went wrong!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function rideOffers(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ride_id' => 'nullable|exists:rides,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $user = $request->user();
+
+            $rideOffers = RideOffer::where('ride_id', $request->ride_id)
+                ->with('driver')
+                ->where('status', 'pending')
+                ->orderBy('offered_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'ride_offers' => $rideOffers,
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            Log::error('API Get Ride Offers failed', ['error' => $th->getMessage()]);
+            return response()->json([
+                'message' => 'Something went wrong!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function acceptRideOffer(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ride_offer_id' => 'required|exists:ride_offers,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $user = $request->user();
+
+            $rideOffer = RideOffer::find($request->ride_offer_id);
+
+            if ($rideOffer->status !== 'pending') {
+                return response()->json([
+                    'message' => 'This ride offer is no longer available.'
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Update ride offer status to accepted
+            $rideOffer->status = 'accepted';
+            $rideOffer->accepted_at = now();
+            $rideOffer->save();
+
+            // Update the associated ride
+            $ride = Ride::find($rideOffer->ride_id);
+            $ride->driver_id = $rideOffer->driver_id;
+            $ride->status = 'accepted';
+            $ride->accepted_at = now();
+            $ride->save();
+
+            $driver = $rideOffer->driver;
+            app('notificationService')->notifyUsers(
+                [$driver],
+                'Ride Offer Accepted',
+                'Your ride offer has been accepted by the passenger.',
+                'ride_offers',
+                $rideOffer->id,
+                'ride_offer_details'
+            );
+
+            return response()->json([
+                'message' => 'Ride offer accepted successfully!',
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            Log::error('API Accept Ride Offer failed', ['error' => $th->getMessage()]);
+            return response()->json([
+                'message' => 'Something went wrong!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function rejectRideOffer(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ride_offer_id' => 'required|exists:ride_offers,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $user = $request->user();
+
+            $rideOffer = RideOffer::find($request->ride_offer_id);
+
+            if ($rideOffer->status !== 'pending') {
+                return response()->json([
+                    'message' => 'This ride offer cannot be cancelled.'
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Update ride offer status to cancelled
+            $rideOffer->status = 'rejected';
+            $rideOffer->save();
+
+            $driver = $rideOffer->driver;
+            app('notificationService')->notifyUsers(
+                [$driver],
+                'Ride Offer Rejected',
+                'Your ride offer has been rejected by the passenger.',
+                'ride_offers',
+                $rideOffer->id,
+                'ride_offer_details'
+            );
+
+            return response()->json([
+                'message' => 'Ride offer rejected successfully!',
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            Log::error('API Reject Ride Offer failed', ['error' => $th->getMessage()]);
+            return response()->json([
+                'message' => 'Something went wrong!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function expireRideOffer(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ride_offer_id' => 'required|exists:ride_offers,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $user = $request->user();
+
+            $rideOffer = RideOffer::find($request->ride_offer_id);
+
+            if ($rideOffer->status !== 'pending') {
+                return response()->json([
+                    'message' => 'This ride offer cannot be expired.'
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Update ride offer status to expired
+            $rideOffer->status = 'expired';
+            $rideOffer->save();
+
+            $driver = $rideOffer->driver;
+            app('notificationService')->notifyUsers(
+                [$driver],
+                'Ride Offer Expired',
+                'Your ride offer has expired.',
+                'ride_offers',
+                $rideOffer->id,
+                'ride_offer_details'
+            );
+
+            return response()->json([
+                'message' => 'Ride offer expired successfully!',
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            Log::error('API Expire Ride Offer failed', ['error' => $th->getMessage()]);
+            return response()->json([
+                'message' => 'Something went wrong!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function cancelRide(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ride_id' => 'required|exists:rides,id',
+            'cancel_reason' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $user = $request->user();
+
+            $ride = Ride::find($request->ride_id);
+
+            if ($ride->passenger_id !== $user->id) {
+                return response()->json([
+                    'message' => 'You are not authorized to cancel this ride.'
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            if (in_array($ride->status, ['completed', 'cancelled'])) {
+                return response()->json([
+                    'message' => 'This ride cannot be cancelled.'
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Update ride status to cancelled
+            $ride->status = 'cancelled';
+            $ride->cancelled_at = now();
+            $ride->cancel_reason = $request->cancel_reason;
+            $ride->save();
+
+            // Notify the driver if assigned
+            if ($ride->driver_id) {
+                $driver = $ride->driver;
+                app('notificationService')->notifyUsers(
+                    [$driver],
+                    'Ride Cancelled',
+                    'The passenger has cancelled the ride.',
+                    'rides',
+                    $ride->id,
+                    'ride_details'
+                );
+            }
+
+            return response()->json([
+                'message' => 'Ride cancelled successfully!',
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            Log::error('API Cancel Ride failed', ['error' => $th->getMessage()]);
             return response()->json([
                 'message' => 'Something went wrong!'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);

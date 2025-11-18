@@ -31,4 +31,19 @@ class Ride extends Model
         'cancelled_at',
         'cancel_reason',
     ];
+
+    public function rideOffers()
+    {
+        return $this->hasMany(RideOffer::class, 'ride_id');
+    }
+    
+    public function passenger()
+    {
+        return $this->belongsTo(User::class, 'passenger_id');
+    }
+
+    public function driver()
+    {
+        return $this->belongsTo(User::class, 'driver_id');
+    }
 }
