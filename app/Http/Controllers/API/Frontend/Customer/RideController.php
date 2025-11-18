@@ -148,7 +148,7 @@ class RideController extends Controller
                 ];
             });
             return response()->json([
-                'vehicle_types' => $vehicleTypes,
+                'vehicle_types' => $data,
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
             Log::error('API Get Vehicle Types failed', ['error' => $th->getMessage()]);
