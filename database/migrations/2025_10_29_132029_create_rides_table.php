@@ -16,8 +16,11 @@ return new class extends Migration
             $table->foreignId('passenger_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('driver_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('vehicle_type_id')->constrained()->cascadeOnDelete();
-            $table->point('pickup_location');
-            $table->point('dropoff_location');
+            $table->foreignId('promo_code_id')->nullable()->constrained('promo_codes')->onDelete('set null');
+            $table->string('pickup_latitude');
+            $table->string('pickup_longitude');
+            $table->string('dropoff_latitude')->nullable();
+            $table->string('dropoff_longitude')->nullable();
             $table->decimal('distance_km', 8, 2)->nullable();
             $table->integer('duration_minutes')->nullable();
             $table->decimal('subtotal', 8, 2)->default(0);

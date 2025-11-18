@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\API\Auth\LoginController;
+use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\API\Auth\RegisterController;
+use App\Http\Controllers\API\Frontend\Customer\RideController;
+use App\Http\Controllers\API\Frontend\Driver\RideController as DriverRideController;
 use App\Http\Controllers\API\Frontend\DriverDetailsController;
 use App\Http\Controllers\API\Frontend\NotificationController;
 use App\Http\Controllers\Dashboard\HomeController;
@@ -22,6 +25,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
+    Route::post('/logout', [LogoutController::class, 'logout']);
 
     //Resent OTP API
     Route::get('/resend-otp', [LoginController::class, 'resend_otp']);
@@ -47,6 +52,18 @@ Route::middleware('auth:sanctum')->group(function () {
         //Driver CNIC
         Route::get('/cnic', [DriverDetailsController::class, 'getCNICDetails']);
         Route::post('/cnic/update', [DriverDetailsController::class, 'updateCNICDetails']);
+
+        //Ride Offers
+        Route::get('/get-rides', [DriverRideController::class, 'getLatestRides']);
+        Route::post('/offer-ride', [DriverRideController::class, 'OfferToRide']);
+    });
+
+    //Customer Routes
+    Route::group(['prefix' => 'customer'], function () {
+        //Customer Personal Information
+        route::post('/request-ride', [RideController::class, 'requestRide']);
+        route::post('/calculate-distance-fare', [RideController::class, 'calculateDistanceFare']);
+        route::post('/apply-promo-code', [RideController::class, 'promoCodeApply']);
     });
 
 });

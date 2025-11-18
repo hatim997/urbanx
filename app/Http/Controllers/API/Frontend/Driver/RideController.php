@@ -1,0 +1,99 @@
+<?php
+
+namespace App\Http\Controllers\API\Frontend\Driver;
+
+use App\Http\Controllers\Controller;
+use App\Models\DriverVehicle;
+use App\Models\Ride;
+use App\Models\RideOffer;
+use App\Models\VehicleType;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response;
+
+class RideController extends Controller
+{
+    public function getLatestRides(Request $request)
+    {
+        try {
+            $tenMinutesAgo = now()->subMinutes(10);
+
+            $driverVehicleType = DriverVehicle::where('driver_id', auth()->id())
+                ->value('vehicle_type_id');
+
+            if (!$driverVehicleType) {
+                return response()->json([
+                    'message' => 'Driver vehicle not found.'
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $offeredRideIds = RideOffer::where('driver_id', auth()->id())
+                ->pluck('ride_id');
+
+            $rides = Ride::where('status', 'requested')
+                ->where('requested_at', '>=', $tenMinutesAgo)
+                ->where('vehicle_type_id', $driverVehicleType)
+                ->whereNotIn('id', $offeredRideIds)
+                ->orderBy('requested_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'rides' => $rides,
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            Log::error('API Get Rides failed', ['error' => $th->getMessage()]);
+            return response()->json([
+                'message' => 'Something went wrong!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    public function OfferToRide(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ride_id' => 'required|exists:rides,id',
+            'proposed_price' => 'required|numeric|min:0',
+            'eta_minutes' => 'required|integer|min:0',
+            'note' => 'nullable|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $ride = Ride::find($request->ride_id);
+            if ($ride->status !== 'requested') {
+                return response()->json([
+                    'message' => 'Ride is no longer available for offer.'
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Create a new ride offer
+            $rideOffer = new RideOffer();
+            $rideOffer->ride_id = $ride->id;
+            $rideOffer->driver_id = auth()->id();
+            $rideOffer->proposed_price = $request->proposed_price;
+            $rideOffer->eta_minutes = $request->eta_minutes;
+            $rideOffer->note = $request->note;
+            $rideOffer->offered_at = now();
+            $rideOffer->status = 'pending';
+            $rideOffer->save();
+
+            return response()->json([
+                'message' => 'Ride offered successfully.',
+                'ride' => $ride,
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            Log::error('API Offer to Ride failed', ['error' => $th->getMessage()]);
+            return response()->json([
+                'message' => 'Something went wrong!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+}

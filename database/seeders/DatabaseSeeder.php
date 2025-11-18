@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
+            VehicleTypeSeeder::class,
             UserRolePermissionSeeder::class,
             CountrySeeder::class,
             LanguageSeeder::class,
@@ -28,7 +29,6 @@ class DatabaseSeeder extends Seeder
             DesignationSeeder::class,
             TimezoneSeeder::class,
             SettingSeeder::class,
-            VehicleTypeSeeder::class,
         ]);
     }
 }

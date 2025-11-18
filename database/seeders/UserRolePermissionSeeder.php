@@ -110,5 +110,62 @@ class UserRolePermissionSeeder extends Seeder
             'user_id' => $adminUser->id,
             'first_name' => $adminUser->name,
         ]);
+
+        $driverUser = User::firstOrCreate([
+                    'email' => 'driver@gmail.com',
+                ], [
+                    'name' => 'Driver',
+                    'email' => 'driver@gmail.com',
+                    'phone' => '1234567890',
+                    'username' => 'driver',
+                    'password' => Hash::make ('driver@gmail.com'),
+                    'email_verified_at' => now(),
+                ]);
+
+        $driverUser->assignRole($driverRole);
+
+        $driverProfile = $driverUser->profile()->firstOrCreate([
+            'user_id' => $driverUser->id,
+        ], [
+            'user_id' => $driverUser->id,
+            'first_name' => $driverUser->name,
+        ]);
+
+        $driverCnic = $driverUser->driverCnic()->firstOrCreate([
+            'driver_id' => $driverUser->id,
+        ], [
+            'driver_id' => $driverUser->id,
+            'name' => 'John Doe',
+            'cnic_number' => '1234567890987654321',
+            'issue_date' => now()->subYears(5),
+            'front_picture' => 'path/to/front_picture.jpg',
+            'back_picture' => 'path/to/back_picture.jpg',
+        ]);
+
+        $driverLicense = $driverUser->driverLicense()->firstOrCreate([
+            'driver_id' => $driverUser->id,
+        ], [
+            'driver_id' => $driverUser->id,
+            'name' => 'John Doe',
+            'license_number' => '1234567890987654321',
+            'address' => 'Karachi, Pakistan',
+            'front_picture' => 'path/to/front_picture.jpg',
+            'back_picture' => 'path/to/back_picture.jpg',
+        ]);
+
+        $driverVehicle = $driverUser->driverVehicle()->firstOrCreate([
+            'driver_id' => $driverUser->id,
+        ], [
+            'driver_id' => $driverUser->id,
+            'vehicle_type_id' => 1,
+            'vehicle_name' => 'Toyota Prius',
+            'vehicle_make' => 'Toyota',
+            'vehicle_model' => 'Prius',
+            'vehicle_color' => 'White',
+            'vehicle_year' => '2020',
+            'vehicle_plate_number' => 'ABC-1234',
+            'vehicle_images' => 'path/to/vehicle_image.jpg',
+        ]);
+
     }
 }
