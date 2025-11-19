@@ -15,6 +15,7 @@ use App\Http\Controllers\Dashboard\User\ArchivedUserController;
 use App\Http\Controllers\Dashboard\User\UserController;
 use App\Http\Controllers\Dashboard\DriverController;
 use App\Http\Controllers\Dashboard\PromoCodeController;
+use App\Http\Controllers\Dashboard\VehicleTypeController;
 use App\Http\Middleware\CheckAccountActivation;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -148,6 +149,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             //PromoCode Routes
             Route::resource('promo-codes', PromoCodeController::class);
+            Route::get('promo-codes/status/{id}', [PromoCodeController::class, 'updateStatus'])->name('promo-codes.status.update');
+
+            //VehicleTypeController Routes
+            Route::resource('vehicle-types', VehicleTypeController::class);
+            Route::get('vehicle-types/status/{id}', [VehicleTypeController::class, 'updateStatus'])->name('vehicle-types.status.update');
 
             //Create Notification
             Route::get('/notifications/create', [NotificationController::class, 'create'])->name('notifications.create');

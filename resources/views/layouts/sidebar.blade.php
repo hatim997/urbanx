@@ -44,6 +44,14 @@
                 </a>
             </li>
         @endcan
+        @can(['view vehicle type'])
+            <li class="menu-item {{ request()->routeIs('dashboard.vehicle-types.*') ? 'active' : '' }}">
+                <a href="{{ route('dashboard.vehicle-types.index') }}" class="menu-link" style="color: #fff !important;">
+                    <i class="menu-icon tf-icons ti ti-car"></i>
+                    <div>{{__('Vehicle Types')}}</div>
+                </a>
+            </li>
+        @endcan
         @can(['create notification'])
             <li class="menu-item {{ request()->routeIs('dashboard.notifications.create') ? 'active' : '' }}">
                 <a href="{{ route('dashboard.notifications.create') }}" class="menu-link" style="color: #fff !important;">

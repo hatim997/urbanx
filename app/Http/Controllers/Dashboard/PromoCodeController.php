@@ -167,4 +167,25 @@ class PromoCodeController extends Controller
             throw $th;
         }
     }
+
+    public function updateStatus(string $id)
+    {
+        $this->authorize('update promo code');
+        try {
+            $promoCode = PromoCode::findOrFail($id);
+            $message = $promoCode->is_active == 'active' ? 'Promo Code Deactivated Successfully' : 'Promo Code Activated Successfully';
+            if ($promoCode->is_active == 'active') {
+                $promoCode->is_active = 'inactive';
+                $promoCode->save();
+            } else {
+                $promoCode->is_active = 'active';
+                $promoCode->save();
+            }
+            return redirect()->back()->with('success', $message);
+        } catch (\Throwable $th) {
+            Log::error('Account Status Updation Failed', ['error' => $th->getMessage()]);
+            return redirect()->back()->with('error', "Something went wrong! Please try again later");
+            throw $th;
+        }
+    }
 }
