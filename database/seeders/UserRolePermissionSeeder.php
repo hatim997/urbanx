@@ -52,6 +52,11 @@ class UserRolePermissionSeeder extends Seeder
         Permission::create(['name' => 'update notification']);
         Permission::create(['name' => 'delete notification']);
 
+        Permission::create(['name' => 'view promo code']);
+        Permission::create(['name' => 'create promo code']);
+        Permission::create(['name' => 'update promo code']);
+        Permission::create(['name' => 'delete promo code']);
+
         // Create Roles
         $superAdminRole = Role::create(['name' => 'super-admin']); //as super-admin
         $adminRole = Role::create(['name' => 'admin']);

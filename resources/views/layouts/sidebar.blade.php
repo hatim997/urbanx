@@ -36,6 +36,14 @@
                 </a>
             </li>
         @endcan
+        @can(['view promo code'])
+            <li class="menu-item {{ request()->routeIs('dashboard.promo-codes.*') ? 'active' : '' }}">
+                <a href="{{ route('dashboard.promo-codes.index') }}" class="menu-link" style="color: #fff !important;">
+                    <i class="menu-icon tf-icons ti ti-tag"></i>
+                    <div>{{__('Promo Codes')}}</div>
+                </a>
+            </li>
+        @endcan
         @can(['create notification'])
             <li class="menu-item {{ request()->routeIs('dashboard.notifications.create') ? 'active' : '' }}">
                 <a href="{{ route('dashboard.notifications.create') }}" class="menu-link" style="color: #fff !important;">

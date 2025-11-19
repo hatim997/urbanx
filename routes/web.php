@@ -14,6 +14,7 @@ use App\Http\Controllers\Dashboard\SettingController;
 use App\Http\Controllers\Dashboard\User\ArchivedUserController;
 use App\Http\Controllers\Dashboard\User\UserController;
 use App\Http\Controllers\Dashboard\DriverController;
+use App\Http\Controllers\Dashboard\PromoCodeController;
 use App\Http\Middleware\CheckAccountActivation;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -144,6 +145,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             // User Dashboard Authentication Routes
             Route::resource('drivers', DriverController::class);
+
+            //PromoCode Routes
+            Route::resource('promo-codes', PromoCodeController::class);
 
             //Create Notification
             Route::get('/notifications/create', [NotificationController::class, 'create'])->name('notifications.create');
