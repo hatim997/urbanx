@@ -49,6 +49,30 @@ class RideController extends Controller
         }
     }
 
+    public function getSingleRideDetails($ride_id)
+    {
+        try {
+            $ride = Ride::where('id', $ride_id)
+                ->where('status', 'requested')
+                ->first();
+
+            if (!$ride) {
+                return response()->json([
+                    'message' => 'Ride not found or no longer available.'
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            return response()->json([
+                'ride' => $ride,
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            Log::error('API Get Single Ride Details failed', ['error' => $th->getMessage()]);
+            return response()->json([
+                'message' => 'Something went wrong!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     public function OfferToRide(Request $request)
     {

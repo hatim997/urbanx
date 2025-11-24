@@ -55,6 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         //Ride Offers
         Route::get('/get-rides', [DriverRideController::class, 'getLatestRides']);
+        Route::get('/get-single-ride/{ride_id}', [DriverRideController::class, 'getSingleRideDetails']);
         Route::post('/offer-ride', [DriverRideController::class, 'OfferToRide']);
         Route::post('/update-ride-status', [DriverRideController::class, 'updateRideStatus']);
     });
