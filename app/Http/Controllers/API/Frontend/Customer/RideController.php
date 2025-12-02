@@ -202,6 +202,7 @@ class RideController extends Controller
             $ride->save();
 
             return response()->json([
+                'ride_id' => $ride->id,
                 'message' => 'Ride requested successfully!',
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
